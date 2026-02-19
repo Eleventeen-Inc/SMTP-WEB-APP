@@ -22,7 +22,7 @@ export function SignupForm({
             <form>
                 <FieldGroup>
                     <a
-                        href="/auth/log"
+                        href="/auth/login"
                         className="flex flex-col items-center gap-2 font-medium mb-4"
                     >
                         <div className="flex items-center justify-center rounded-md">
@@ -85,7 +85,7 @@ export function SignupForm({
                     </FieldDescription>
                 </FieldGroup>
             </form>
-            <FieldDescription className="py-6 text-center w-full bg-accent absolute bottom-0 left-0 right-0">
+            <FieldDescription className="py-6 text-center w-full bg-accent dark:bg-sidebar absolute bottom-0 left-0 right-0">
                 By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
                 and <a href="#">Privacy Policy</a>.
             </FieldDescription>
