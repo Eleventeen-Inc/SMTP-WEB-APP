@@ -1,9 +1,18 @@
-import { authClient } from "@/lib/auth-client";
+import { appUrl, authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
 export const useAuth = () => {
-    const [loading, setLoading] = useState(false);
+    const router = useRouter();
+
+    const [signinLoading, setSigninLoading] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(false);
+    const [githubLoading, setGithubLoading] = useState(false);
+    const [signupLoading, setSignupLoading] = useState(false);
+    const [forgetPassLoading, setForgetPassLoading] = useState(false);
+    const [resetPassLoading, setResetPassLoading] = useState(false);
+    const [signoutLoading, setSignoutLoading] = useState(false);
     const [error, setError] = useState(false);
     const [errMsg, setErrMsg] = useState('');
 
@@ -18,25 +27,37 @@ export const useAuth = () => {
             setError(false);
             setErrMsg('');
 
-            const { error } = await authClient.signIn.social({
-                provider
-            });
-
-            if (error) {
-                setError(true);
-                setErrMsg(error.message || 'Something went wrong, please try again.');
-                toast.error(error.message || 'Something went wrong, please try again.');
-            }
-
-            toast.success(`You have logged in with ${provider} successfully, redirecting you.`);
             try {
-                setLoading(true);
+                if (provider === 'google') {
+                    setGoogleLoading(true);
+                }
+
+                if (provider === 'github') {
+                    setGithubLoading(true);
+                }
+
+                const { error } = await authClient.signIn.social({
+                    provider,
+                    callbackURL: `${appUrl}/auth/callback`,
+                    fetchOptions: {
+                        credentials: "include",
+                    },
+                });
+
+                if (error) {
+                    setError(true);
+                    setErrMsg(error.message || 'Something went wrong, please try again.');
+                    toast.error(error.message || 'Something went wrong, please try again.');
+                }
+
+                toast.success(`You have logged in with ${provider} successfully, redirecting you.`);
             } catch (error) {
                 toast.error('Internal server error, please try again.');
                 setErrMsg('Internal server error, please try again.');
                 setError(false);
             } finally {
-                setLoading(false);
+                setGithubLoading(false);
+                setGoogleLoading(false);
             }
         },
         signin: async () => {
@@ -49,28 +70,44 @@ export const useAuth = () => {
                 setError(false);
             }
 
-            const { error } = await authClient.signIn.email({
-                email,
-                password,
-                rememberMe: true
-            });
-
-            if (error) {
-                setError(true);
-                setErrMsg(error.message || 'Something went wrong, please try again.');
-                toast.error(error.message || 'Something went wrong, please try again.');
-            }
-
-            toast.success(`You have been logged in successfully, redirecting you.`);
-
             try {
-                setLoading(true);
+                setSigninLoading(true);
+
+                const { error } = await authClient.signIn.email({
+                    email,
+                    password,
+                    rememberMe: true,
+                    fetchOptions: {
+                        credentials: "include",
+                    },
+                });
+
+                if (error) {
+                    console.log(error);
+                    setError(true);
+                    setErrMsg(error.message || 'Something went wrong, please try again.');
+                    toast.error(error.message || 'Something went wrong, please try again.');
+                }
+
+                toast.success(`You have been logged in successfully, redirecting you.`);
             } catch (error) {
                 toast.error('Internal server error, please try again.');
                 setErrMsg('Internal server error, please try again.');
                 setError(false);
             } finally {
-                setLoading(false);
+                setSigninLoading(false);
+            }
+        },
+        signout: async () => {
+            try {
+                setSignoutLoading(true);
+
+                await authClient.signOut();
+                router.refresh();
+            } catch (error) {
+                toast.error('Internal server error, please try again.');
+            } finally {
+                setSignoutLoading(false);
             }
         },
         signup: async () => {
@@ -83,28 +120,31 @@ export const useAuth = () => {
                 setError(false);
             }
 
-            const { error } = await authClient.signUp.email({
-                name,
-                email,
-                password,
-            });
-
-            if (error) {
-                setError(true);
-                setErrMsg(error.message || 'Something went wrong, please try again.');
-                toast.error(error.message || 'Something went wrong, please try again.');
-            }
-
-            toast.success(`You have been signed up successfully, redirecting you.`);
-
             try {
-                setLoading(true);
+                setSignupLoading(true);
+
+                const { error } = await authClient.signUp.email({
+                    name,
+                    email,
+                    password,
+                    fetchOptions: {
+                        credentials: "include",
+                    },
+                });
+
+                if (error) {
+                    setError(true);
+                    setErrMsg(error.message || 'Something went wrong, please try again.');
+                    toast.error(error.message || 'Something went wrong, please try again.');
+                }
+
+                toast.success(`You have been signed up successfully, redirecting you.`);
             } catch (error) {
                 toast.error('Internal server error, please try again.');
                 setErrMsg('Internal server error, please try again.');
                 setError(false);
             } finally {
-                setLoading(false);
+                setSignupLoading(false);
             }
         },
         forgetPass: async () => {
@@ -117,27 +157,30 @@ export const useAuth = () => {
                 setError(false);
             }
 
-            const { error } = await authClient.requestPasswordReset({
-                email,
-                redirectTo: `${process.env.CLIENT_API}/auth/reset-password`
-            });
-
-            if (error) {
-                setError(true);
-                setErrMsg(error.message || 'Something went wrong, please try again.');
-                toast.error(error.message || 'Something went wrong, please try again.');
-            }
-
-            toast.success(`You have been signed up successfully, redirecting you.`);
-
             try {
-                setLoading(true);
+                setForgetPassLoading(true);
+
+                const { error } = await authClient.requestPasswordReset({
+                    email,
+                    redirectTo: `${appUrl}/auth/reset-password`,
+                    fetchOptions: {
+                        credentials: "include",
+                    },
+                });
+
+                if (error) {
+                    setError(true);
+                    setErrMsg(error.message || 'Something went wrong, please try again.');
+                    toast.error(error.message || 'Something went wrong, please try again.');
+                }
+
+                toast.success(`You have been signed up successfully, redirecting you.`);
             } catch (error) {
                 toast.error('Internal server error, please try again.');
                 setErrMsg('Internal server error, please try again.');
                 setError(false);
             } finally {
-                setLoading(false);
+                setForgetPassLoading(false);
             }
         },
         resetPass: async (token: string) => {
@@ -162,33 +205,43 @@ export const useAuth = () => {
                 toast.error('Your confirmation password is not matching with new password.');
             }
 
-            const { error } = await authClient.resetPassword({
-                newPassword: newPass,
-                token,
-            });
-
-            if (error) {
-                setError(true);
-                setErrMsg(error.message || 'Something went wrong, please try again.');
-                toast.error(error.message || 'Something went wrong, please try again.');
-            }
-
-            toast.success('Your password has been changed successfully, redirecting you.');
-
             try {
-                setLoading(true);
+                setResetPassLoading(true);
+
+                const { error } = await authClient.resetPassword({
+                    newPassword: newPass,
+                    token,
+                    fetchOptions: {
+                        credentials: "include",
+                    },
+                });
+
+                if (error) {
+                    setError(true);
+                    setErrMsg(error.message || 'Something went wrong, please try again.');
+                    toast.error(error.message || 'Something went wrong, please try again.');
+                }
+
+                toast.success('Your password has been changed successfully, redirecting you.');
+                router.push('/auth/login');
             } catch (error) {
                 toast.error('Internal server error, please try again.');
                 setErrMsg('Internal server error, please try again.');
                 setError(false);
             } finally {
-                setLoading(false);
+                setResetPassLoading(false);
             }
         }
     };
 
     return {
-        loading,
+        signinLoading,
+        signupLoading,
+        githubLoading,
+        googleLoading,
+        forgetPassLoading,
+        resetPassLoading,
+        signoutLoading,
         error,
         errMsg,
         email,

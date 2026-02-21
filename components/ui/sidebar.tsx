@@ -271,7 +271,7 @@ function SidebarTrigger({
       }}
       {...props}
     >
-      <HugeiconsIcon icon={LayoutAlignLeftIcon} strokeWidth={2} className="rtl:rotate-180" />
+      <HugeiconsIcon icon={LayoutAlignLeftIcon} strokeWidth={2} className="rtl:rotate-180 size-4.5" />
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   )

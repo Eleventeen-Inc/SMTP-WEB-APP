@@ -16,13 +16,20 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from "./ui/input-group"
 import { TextMorph } from 'torph/react';
 import { useAuth } from "@/hooks/use-auth"
 import { useState } from "react"
+import { Badge } from "./ui/badge"
+import { authClient } from "@/lib/auth-client"
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const wasGoogle = authClient.isLastUsedLoginMethod("google");
+  const wasGithub = authClient.isLastUsedLoginMethod("github");
+
   const {
-    loading,
+    githubLoading,
+    googleLoading,
+    signinLoading,
     error,
     errMsg,
     email,
@@ -63,20 +70,42 @@ export function LoginForm({
           </div>
         </a>
         <Field className="flex flex-col space-y-4">
-          <Button className="h-12 rounded-xl" variant="outline" type="button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-github" viewBox="0 0 16 16">
-              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8" />
-            </svg>
-            Continue with GitHub
+          <Button disabled={githubLoading || googleLoading || signinLoading} onClick={() => auth.social('github')} className="h-12 rounded-xl relative overflow-visible" variant="outline" type="button">
+            {githubLoading ? (
+              <HugeiconsIcon icon={Loading03Icon} strokeWidth={2} className="animate-spin" />
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-github" viewBox="0 0 16 16">
+                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8" />
+              </svg>
+            )}
+            <TextMorph>
+              {githubLoading ? 'Processing Login' : 'Continue with GitHub'}
+            </TextMorph>
+            {wasGithub && (
+              <Badge className="absolute -top-2 right-3">
+                Last used
+              </Badge>
+            )}
           </Button>
-          <Button className="h-12 rounded-xl" variant="outline" type="button">
-            <svg width="24" height="24" viewBox="0 0 800 800" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M790.466 407.481C790.466 374.705 787.806 350.787 782.051 325.984H407.785V473.917H627.471C623.043 510.681 599.126 566.045 545.974 603.249L545.229 608.201L663.565 699.874L671.764 700.693C747.058 631.154 790.466 528.839 790.466 407.481Z" fill="#4285F4" />
-              <path d="M407.787 797.255C515.414 797.255 605.768 761.82 671.765 700.699L545.976 603.255C512.315 626.73 467.136 643.118 407.787 643.118C302.373 643.118 212.904 573.582 181.011 477.469L176.336 477.866L53.2888 573.093L51.6797 577.566C117.231 707.783 251.878 797.255 407.787 797.255Z" fill="#34A853" />
-              <path d="M181.011 477.469C172.595 452.666 167.725 426.089 167.725 398.629C167.725 371.167 172.595 344.593 180.568 319.79L180.345 314.507L55.7556 217.75L51.6792 219.689C24.6624 273.726 9.16016 334.407 9.16016 398.629C9.16016 462.852 24.6624 523.53 51.6792 577.567L181.011 477.469Z" fill="#FBBC05" />
-              <path d="M407.787 154.134C482.638 154.134 533.13 186.467 561.921 213.487L674.422 103.643C605.328 39.4198 515.414 0 407.787 0C251.878 0 117.231 89.4687 51.6797 219.685L180.568 319.786C212.904 223.673 302.373 154.134 407.787 154.134Z" fill="#EB4335" />
-            </svg>
-            Continue with Google
+          <Button disabled={githubLoading || googleLoading || signinLoading} onClick={() => auth.social('google')} className="h-12 rounded-xl relative overflow-visible" variant="outline" type="button">
+            {googleLoading ? (
+              <HugeiconsIcon icon={Loading03Icon} strokeWidth={2} className="animate-spin" />
+            ) : (
+              <svg width="24" height="24" viewBox="0 0 800 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M790.466 407.481C790.466 374.705 787.806 350.787 782.051 325.984H407.785V473.917H627.471C623.043 510.681 599.126 566.045 545.974 603.249L545.229 608.201L663.565 699.874L671.764 700.693C747.058 631.154 790.466 528.839 790.466 407.481Z" fill="#4285F4" />
+                <path d="M407.787 797.255C515.414 797.255 605.768 761.82 671.765 700.699L545.976 603.255C512.315 626.73 467.136 643.118 407.787 643.118C302.373 643.118 212.904 573.582 181.011 477.469L176.336 477.866L53.2888 573.093L51.6797 577.566C117.231 707.783 251.878 797.255 407.787 797.255Z" fill="#34A853" />
+                <path d="M181.011 477.469C172.595 452.666 167.725 426.089 167.725 398.629C167.725 371.167 172.595 344.593 180.568 319.79L180.345 314.507L55.7556 217.75L51.6792 219.689C24.6624 273.726 9.16016 334.407 9.16016 398.629C9.16016 462.852 24.6624 523.53 51.6792 577.567L181.011 477.469Z" fill="#FBBC05" />
+                <path d="M407.787 154.134C482.638 154.134 533.13 186.467 561.921 213.487L674.422 103.643C605.328 39.4198 515.414 0 407.787 0C251.878 0 117.231 89.4687 51.6797 219.685L180.568 319.786C212.904 223.673 302.373 154.134 407.787 154.134Z" fill="#EB4335" />
+              </svg>
+            )}
+            <TextMorph>
+              {googleLoading ? 'Processing Login' : 'Continue with Google'}
+            </TextMorph>
+            {wasGoogle && (
+              <Badge className="absolute -top-2 right-3">
+                Last used
+              </Badge>
+            )}
           </Button>
         </Field>
         <FieldSeparator>Or</FieldSeparator>
@@ -90,6 +119,7 @@ export function LoginForm({
             className="h-12 rounded-xl"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            disabled={signinLoading}
           />
         </Field>
         <Field>
@@ -104,6 +134,7 @@ export function LoginForm({
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={signinLoading}
             />
             <InputGroupAddon align="inline-end">
               <Button onClick={passVisibility} variant={'ghost'}>
@@ -119,12 +150,12 @@ export function LoginForm({
           )}
         </Field>
         <Field>
-          <Button disabled={!email || !password || loading} className="h-12 rounded-xl" onClick={auth.signin}>
-            {loading && (
+          <Button disabled={!email || !password || githubLoading || googleLoading || signinLoading} className="h-12 rounded-xl" onClick={auth.signin}>
+            {signinLoading && (
               <HugeiconsIcon icon={Loading03Icon} strokeWidth={2} className="animate-spin" />
             )}
             <TextMorph>
-              {loading ? 'Processing Login' : 'Login'}
+              {signinLoading ? 'Processing Login' : 'Login'}
             </TextMorph>
           </Button>
         </Field>

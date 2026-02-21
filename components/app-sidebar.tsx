@@ -99,7 +99,7 @@ export default function ApplicationSidebar() {
                     </svg>
                 </div>
                 <Select>
-                    <SelectTrigger className="w-full bg-background">
+                    <SelectTrigger className="w-full bg-popover dark:bg-popover">
                         <SelectValue placeholder="Select Team" />
                     </SelectTrigger>
                     <SelectContent>

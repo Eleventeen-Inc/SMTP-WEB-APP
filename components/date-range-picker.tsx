@@ -27,7 +27,7 @@ export function DateRangePicker() {
                     <Button
                         variant="outline"
                         id="date-picker-range"
-                        className="justify-start px-2.5 font-normal h-10 rounded-xl"
+                        className="justify-start px-2.5 font-normal h-9"
                     >
                         <HugeiconsIcon 
                         icon={Calendar04Icon}
